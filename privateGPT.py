@@ -41,30 +41,31 @@ def main():
             raise Exception(f"Model type {model_type} is not supported. Please choose one of the following: LlamaCpp, GPT4All")
         
     qa = RetrievalQA.from_chain_type(llm=llm, chain_type="stuff", retriever=retriever, return_source_documents= not args.hide_source)
+
     # Interactive questions and answers
-    while True:
-        query = input("\nEnter a query: ")
-        if query == "exit":
-            break
-        if query.strip() == "":
-            continue
+    # while True:
+    query = input("\nEnter a query: ")
+    # if query == "exit":
+    #     break
+    # if query.strip() == "":
+    #     continue
 
-        # Get the answer from the chain
-        start = time.time()
-        res = qa(query)
-        answer, docs = res['result'], [] if args.hide_source else res['source_documents']
-        end = time.time()
+    # Get the answer from the chain
+    start = time.time()
+    res = qa(query)
+    answer, docs = res['result'], [] if args.hide_source else res['source_documents']
+    end = time.time()
 
-        # Print the result
-        print("\n\n> Question:")
-        print(query)
-        print(f"\n> Answer (took {round(end - start, 2)} s.):")
-        print(answer)
+    # Print the result
+    print("\n\n> Question:")
+    print(query)
+    print(f"\n> Answer (took {round(end - start, 2)} s.):")
+    print(answer)
 
-        # Print the relevant sources used for the answer
-        for document in docs:
-            print("\n> " + document.metadata["source"] + ":")
-            print(document.page_content)
+    # Print the relevant sources used for the answer
+    for document in docs:
+        print("\n> " + document.metadata["source"] + ":")
+        print(document.page_content)
 
 def parse_arguments():
     parser = argparse.ArgumentParser(description='privateGPT: Ask questions to your documents without an internet connection, '
