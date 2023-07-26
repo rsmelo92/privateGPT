@@ -3,8 +3,8 @@ default:
 	make run
 
 build:
-	rm -rf ./db
-	python3 ingest.py
+	rm -rf ./privateGPT/db
+	python3 ./privateGPT/ingest.py
 
 run:
-	python3 privateGPT.py --hide-source --mute-stream
+	python3 ./privateGPT/privateGPT.py --hide-source --mute-stream

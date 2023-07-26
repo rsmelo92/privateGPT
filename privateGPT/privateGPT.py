@@ -32,18 +32,13 @@ def main():
     embeddings = HuggingFaceEmbeddings(model_name=embeddings_model_name)
     db = Chroma(persist_directory=persist_directory, embedding_function=embeddings, client_settings=CHROMA_SETTINGS)
     retriever = db.as_retriever(search_kwargs={"k": target_source_chunks})
+    
     # activate/deactivate the streaming StdOut callback for LLMs
     callbacks = [] if args.mute_stream else [StreamingStdOutCallbackHandler()]
+    
     # Prepare the LLM
-    match model_type:
-        case "LlamaCpp":
-            llm = LlamaCpp(model_path=model_path, n_gpu_layers=n_gpu_layers, f16_kv=True, max_tokens=model_n_ctx, n_batch=model_n_batch, callbacks=callbacks, verbose=True)
-        case "GPT4All":
-            llm = GPT4All(model=model_path, max_tokens=model_n_ctx, backend='gptj', n_batch=model_n_batch, callbacks=callbacks, verbose=False)
-        case _default:
-            # raise exception if model_type is not supported
-            raise Exception(f"Model type {model_type} is not supported. Please choose one of the following: LlamaCpp, GPT4All")
-        
+    llm = LlamaCpp(model_path=model_path, n_gpu_layers=n_gpu_layers, f16_kv=True, max_tokens=model_n_ctx, n_batch=model_n_batch, callbacks=callbacks, verbose=False)
+
     qa = RetrievalQA.from_chain_type(llm=llm, chain_type="stuff", retriever=retriever, return_source_documents= not args.hide_source)
 
     # Interactive questions and answers
