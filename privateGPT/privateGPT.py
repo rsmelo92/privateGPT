@@ -4,7 +4,8 @@ from langchain.chains import RetrievalQA
 from langchain.embeddings import HuggingFaceEmbeddings
 from langchain.callbacks.streaming_stdout import StreamingStdOutCallbackHandler
 from langchain.vectorstores import Chroma
-from langchain.llms import GPT4All, LlamaCpp
+from langchain.llms import LlamaCpp
+
 import os
 import argparse
 import time
@@ -41,14 +42,8 @@ def main():
 
     qa = RetrievalQA.from_chain_type(llm=llm, chain_type="stuff", retriever=retriever, return_source_documents= not args.hide_source)
 
-    # Interactive questions and answers
-    # while True:
     query = input("\nEnter a query: ")
-    # if query == "exit":
-    #     break
-    # if query.strip() == "":
-    #     continue
-
+ 
     # Get the answer from the chain
     start = time.time()
     res = qa(query)
