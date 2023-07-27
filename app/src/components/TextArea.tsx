@@ -1,6 +1,5 @@
 import { SendTwoTone } from "@mui/icons-material";
 import { Box, IconButton, TextField } from "@mui/material";
-import React from "react";
 
 export const TextArea = () => {
   return (

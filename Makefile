@@ -8,3 +8,6 @@ build:
 
 run:
 	python3 ./privateGPT/privateGPT.py --hide-source
+
+client:
+	cd ./app && yarn start && cd ..

@@ -24,10 +24,34 @@ target_source_chunks = int(os.environ.get('TARGET_SOURCE_CHUNKS',4))
 # Metal https://python.langchain.com/docs/integrations/llms/llamacpp#metal
 n_gpu_layers = 1  # Metal set to 1 is enough.
 
-
 from constants import CHROMA_SETTINGS
 
-def main():
+default_args = argparse.Namespace(mute_stream=False, hide_source=True)
+
+def enquire(chain, query):
+    args = parse_arguments()
+
+    # Get the answer from the chain
+    start = time.time()
+    res = chain(query)
+    answer, docs = res['result'], [] if args.hide_source else res['source_documents']
+    end = time.time()
+
+    if args.mute_stream:
+        # Print the result
+        print("\n\n> Question:")
+        print(query)
+        print(f"\n> Answer (took {round(end - start, 2)} s.):")
+        print(answer)
+
+    # Print the relevant sources used for the answer
+    for document in docs:
+        print("\n> " + document.metadata["source"] + ":")
+        print(document.page_content)
+
+    return answer
+
+def prepare(args = default_args):
     # Parse the command line arguments
     args = parse_arguments()
     embeddings = HuggingFaceEmbeddings(model_name=embeddings_model_name)
@@ -40,26 +64,23 @@ def main():
     # Prepare the LLM
     llm = LlamaCpp(model_path=model_path, n_gpu_layers=n_gpu_layers, f16_kv=True, max_tokens=model_n_ctx, n_batch=model_n_batch, callbacks=callbacks, verbose=False)
 
-    qa = RetrievalQA.from_chain_type(llm=llm, chain_type="stuff", retriever=retriever, return_source_documents= not args.hide_source)
+    return RetrievalQA.from_chain_type(llm=llm, chain_type="stuff", retriever=retriever, return_source_documents= not args.hide_source)
 
-    query = input("\nEnter a query: ")
- 
-    # Get the answer from the chain
-    start = time.time()
-    res = qa(query)
-    answer, docs = res['result'], [] if args.hide_source else res['source_documents']
-    end = time.time()
+def call_as_module(query):
+    chain = prepare()
+    enquire(chain, query)
 
-    # Print the result
-    print("\n\n> Question:")
-    print(query)
-    print(f"\n> Answer (took {round(end - start, 2)} s.):")
-    print(answer)
+def main():
+    chain = prepare()
 
-    # Print the relevant sources used for the answer
-    for document in docs:
-        print("\n> " + document.metadata["source"] + ":")
-        print(document.page_content)
+    while True:
+        query = input("\nEnter a query: ")
+        if query == "exit":
+            break
+        if query.strip() == "":
+            continue
+        enquire(chain, query)
+
 
 def parse_arguments():
     parser = argparse.ArgumentParser(description='privateGPT: Ask questions to your documents without an internet connection, '
