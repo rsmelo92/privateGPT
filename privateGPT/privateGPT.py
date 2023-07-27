@@ -54,6 +54,7 @@ def enquire(chain, query):
 def prepare(args = default_args):
     # Parse the command line arguments
     args = parse_arguments()
+    print(args)
     embeddings = HuggingFaceEmbeddings(model_name=embeddings_model_name)
     db = Chroma(persist_directory=persist_directory, embedding_function=embeddings, client_settings=CHROMA_SETTINGS)
     retriever = db.as_retriever(search_kwargs={"k": target_source_chunks})
@@ -62,6 +63,7 @@ def prepare(args = default_args):
     callbacks = [] if args.mute_stream else [StreamingStdOutCallbackHandler()]
     
     # Prepare the LLM
+    print(model_path)
     llm = LlamaCpp(model_path=model_path, n_gpu_layers=n_gpu_layers, f16_kv=True, max_tokens=model_n_ctx, n_batch=model_n_batch, callbacks=callbacks, verbose=False)
 
     return RetrievalQA.from_chain_type(llm=llm, chain_type="stuff", retriever=retriever, return_source_documents= not args.hide_source)
@@ -72,7 +74,6 @@ def call_as_module(query):
 
 def main():
     chain = prepare()
-
     while True:
         query = input("\nEnter a query: ")
         if query == "exit":

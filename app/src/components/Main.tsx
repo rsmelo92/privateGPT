@@ -1,8 +1,10 @@
 import { Box } from "@mui/material";
+import { PythonShell } from "python-shell";
 
 import { TextArea } from "./TextArea";
 
 export const Main = () => {
+  // const chat = new PythonShell("../privateGPT/privateGPT.py");
   return (
     <Box
       sx={{
