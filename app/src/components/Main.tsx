@@ -1,23 +1,60 @@
 import { Box, LinearProgress } from "@mui/material";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import { TextArea } from "./TextArea";
+
+const fetchAnswer = (
+  text: string,
+  onAnswer: (res: string) => void,
+  onFinally: () => void,
+) => {
+  fetch(`http://localhost:8000/ask-stream?query=${text}`)
+    .then((res) => res.text())
+    .then((res) => {
+      onAnswer(res);
+    })
+    .catch(console.error)
+    .finally(() => {
+      onFinally();
+    });
+};
 
 export const Main = () => {
   const [textContent, setTextContent] = useState(["Hello World!"]);
   const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(() => {
+    console.log("sse");
+
+    const sse = new EventSource("http://localhost:8000/progress");
+
+    sse.onmessage = ({ type, data }) => {
+      console.log("on message");
+      if (type === "message") console.log({ data });
+    };
+
+    sse.onopen = (res) => {
+      console.log("Open", res);
+      // sse.close();
+    };
+
+    return () => {
+      sse.close();
+    };
+  }, []);
+
   const onSend = (text: string) => {
     setTextContent([text, ...textContent]);
     setIsLoading(true);
-    fetch(`http://localhost:8000/ask-stream?query=${text}`)
-      .then((res) => res.text())
-      .then((res) => {
-        setTextContent([res, text, ...textContent]);
-      })
-      .catch(console.error)
-      .finally(() => {
-        setIsLoading(false);
-      });
+    // fetchAnswer(
+    //   text,
+    //   (res) => {
+    //     setTextContent([res, text, ...textContent]);
+    //   },
+    //   () => {
+    //     setIsLoading(false);
+    //   },
+    // );
   };
   return (
     <Box
