@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+<body>
+  <h4>Replaced it shall be</h4>
+  <script>
+    var source = new EventSource('/progress');
+    source.addEventListener('message', function(e) {
+      console.log({ data: e.data });
+      document.body.innerHTML += e.data + '<br>';
+    }, false);
+  </script>
+</body>
+</html>

@@ -29,44 +29,38 @@ from constants import CHROMA_SETTINGS
 default_args = argparse.Namespace(mute_stream=False, hide_source=True)
 
 def enquire(chain, query):
-    args = parse_arguments()
+    # args = parse_arguments()
 
     # Get the answer from the chain
     start = time.time()
     res = chain(query)
-    answer, docs = res['result'], [] if args.hide_source else res['source_documents']
+    answer = res['result']
     end = time.time()
 
-    if args.mute_stream:
-        # Print the result
-        print("\n\n> Question:")
-        print(query)
-        print(f"\n> Answer (took {round(end - start, 2)} s.):")
-        print(answer)
-
-    # Print the relevant sources used for the answer
-    for document in docs:
-        print("\n> " + document.metadata["source"] + ":")
-        print(document.page_content)
+    # if args.mute_stream:
+    #     # Print the result
+    print("\n\n> Question:")
+    print(query)
+    print(f"\n> Answer (took {round(end - start, 2)} s.):")
+    print(answer)
 
     return answer
 
-def prepare(args = default_args):
+def prepare(callback):
     # Parse the command line arguments
-    args = parse_arguments()
-    print(args)
+    # args = parse_arguments()
     embeddings = HuggingFaceEmbeddings(model_name=embeddings_model_name)
     db = Chroma(persist_directory=persist_directory, embedding_function=embeddings, client_settings=CHROMA_SETTINGS)
     retriever = db.as_retriever(search_kwargs={"k": target_source_chunks})
     
     # activate/deactivate the streaming StdOut callback for LLMs
-    callbacks = [] if args.mute_stream else [StreamingStdOutCallbackHandler()]
+    callbacks = [StreamingStdOutCallbackHandler()]
     
     # Prepare the LLM
-    print(model_path)
-    llm = LlamaCpp(model_path=model_path, n_gpu_layers=n_gpu_layers, f16_kv=True, max_tokens=model_n_ctx, n_batch=model_n_batch, callbacks=callbacks, verbose=False)
+    llm = LlamaCpp(stream=True, model_path=model_path, n_gpu_layers=n_gpu_layers, f16_kv=True, max_tokens=model_n_ctx, n_batch=model_n_batch, callbacks=callback, verbose=False)
+    # llm = LlamaCpp(stream=True, model_path=model_path, n_gpu_layers=n_gpu_layers, f16_kv=True, max_tokens=model_n_ctx, n_batch=model_n_batch, callbacks=callbacks, verbose=False)
 
-    return RetrievalQA.from_chain_type(llm=llm, chain_type="stuff", retriever=retriever, return_source_documents= not args.hide_source)
+    return RetrievalQA.from_chain_type(llm=llm, chain_type="stuff", retriever=retriever, return_source_documents=False)
 
 def call_as_module(query):
     chain = prepare()
