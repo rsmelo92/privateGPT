@@ -29,8 +29,6 @@ from constants import CHROMA_SETTINGS
 default_args = argparse.Namespace(mute_stream=False, hide_source=True)
 
 def enquire(chain, query):
-    # args = parse_arguments()
-
     # Get the answer from the chain
     start = time.time()
     res = chain(query)
@@ -48,7 +46,6 @@ def enquire(chain, query):
 
 def prepare():
     # Parse the command line arguments
-    # args = parse_arguments()
     embeddings = HuggingFaceEmbeddings(model_name=embeddings_model_name)
     db = Chroma(persist_directory=persist_directory, embedding_function=embeddings, client_settings=CHROMA_SETTINGS)
     retriever = db.as_retriever(search_kwargs={"k": target_source_chunks})
@@ -57,7 +54,6 @@ def prepare():
     callbacks = [StreamingStdOutCallbackHandler()]
     
     # Prepare the LLM
-    # llm = LlamaCpp(stream=True, model_path=model_path, n_gpu_layers=n_gpu_layers, f16_kv=True, max_tokens=model_n_ctx, n_batch=model_n_batch, callbacks=callback, verbose=False)
     llm = LlamaCpp(stream=True, model_path=model_path, n_gpu_layers=n_gpu_layers, f16_kv=True, max_tokens=model_n_ctx, n_batch=model_n_batch, callbacks=callbacks, verbose=False)
 
     return RetrievalQA.from_chain_type(llm=llm, chain_type="stuff", retriever=retriever, return_source_documents=False)
@@ -75,20 +71,6 @@ def main():
         if query.strip() == "":
             continue
         enquire(chain, query)
-
-
-def parse_arguments():
-    parser = argparse.ArgumentParser(description='privateGPT: Ask questions to your documents without an internet connection, '
-                                                 'using the power of LLMs.')
-    parser.add_argument("--hide-source", "-S", action='store_true',
-                        help='Use this flag to disable printing of source documents used for answers.')
-
-    parser.add_argument("--mute-stream", "-M",
-                        action='store_true',
-                        help='Use this flag to disable the streaming StdOut callback for LLMs.')
-
-    return parser.parse_args()
-
 
 if __name__ == "__main__":
     main()

@@ -1,7 +1,18 @@
 import { SendTwoTone } from "@mui/icons-material";
 import { Box, IconButton, TextField } from "@mui/material";
+import { useState } from "react";
 
-export const TextArea = () => {
+type TextAreaProps = {
+  onSend?: (value: string) => void;
+};
+
+export const TextArea = ({ onSend: _onSend }: TextAreaProps) => {
+  const [message, setMessage] = useState("");
+  const onSend = async () => {
+    if (message === "") return;
+    _onSend(message);
+    setMessage("");
+  };
   return (
     <Box
       component="form"
@@ -20,6 +31,16 @@ export const TextArea = () => {
         color="primary"
         rows={4}
         placeholder="Type a message here"
+        value={message}
+        onChange={(e) => {
+          setMessage(e.target.value);
+        }}
+        onKeyPress={(e) => {
+          if (e.key === "Enter") {
+            e.preventDefault();
+            onSend();
+          }
+        }}
       />
       <Box
         sx={{
@@ -33,7 +54,7 @@ export const TextArea = () => {
           padding: "4px 8px",
         }}
       >
-        <IconButton aria-label="delete">
+        <IconButton aria-label="delete" onClick={onSend}>
           <SendTwoTone />
         </IconButton>
       </Box>

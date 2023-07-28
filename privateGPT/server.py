@@ -5,13 +5,8 @@ import privateGPT
 from flask import Flask, Response
 from langchain.callbacks.base import AsyncCallbackHandler
 
-
-class StreamingLLMCallbackHandler(AsyncCallbackHandler):
-    async def on_llm_new_token(self, token: str) -> None:
-        yield token
-
 app = Flask("server")
-gpt = privateGPT.prepare(StreamingLLMCallbackHandler)
+gpt = privateGPT.prepare()
 
 @app.route("/")
 def init():
@@ -26,12 +21,13 @@ def ask():
     return answer
 
 @app.route("/ask-stream")
-def ask():
+def ask_stream():
     args = request.args
     query = args.get("query", default="hello", type=str)
     print("query:", query)
     def generate():
-        yield gpt(query)
+        res = gpt(query)
+        yield  res['result']
     return Response(generate(), mimetype="text/event-stream")
 
 @app.route('/progress')
