@@ -2,12 +2,12 @@
 from dotenv import load_dotenv
 from langchain.chains import RetrievalQA
 from langchain.embeddings import HuggingFaceEmbeddings
-from langchain.callbacks.streaming_stdout import StreamingStdOutCallbackHandler
+from langchain.callbacks.streaming_stdout import StreamingStdOutCallbackHandler, BaseCallbackHandler
 from langchain.vectorstores import Chroma
 from langchain.llms import LlamaCpp
+from queue import SimpleQueue
 
 import os
-import argparse
 import time
 
 load_dotenv()
@@ -26,7 +26,15 @@ n_gpu_layers = 1  # Metal set to 1 is enough.
 
 from constants import CHROMA_SETTINGS
 
-default_args = argparse.Namespace(mute_stream=False, hide_source=True)
+# q = SimpleQueue()
+# # Custom callback for streaming
+# class StreamingGradioCallbackHandler(BaseCallbackHandler):
+#     def __init__(self, q: SimpleQueue):
+#         self.q = q
+
+#     def on_llm_new_token(self, token: str) -> None:
+#         self.q.put(token)
+
 
 def enquire(chain, query):
     # Get the answer from the chain
@@ -35,8 +43,6 @@ def enquire(chain, query):
     answer = res['result']
     end = time.time()
 
-    # if args.mute_stream:
-    #     # Print the result
     print("\n\n> Question:")
     print(query)
     print(f"\n> Answer (took {round(end - start, 2)} s.):")

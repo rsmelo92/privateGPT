@@ -1,9 +1,8 @@
 import time
-from flask import Flask, Response, render_template, request, stream_with_context
+from flask import Flask, Response, render_template, request
 import privateGPT
 
 from flask import Flask, Response
-from langchain.callbacks.base import AsyncCallbackHandler
 
 app = Flask("server")
 gpt = privateGPT.prepare()
@@ -14,14 +13,6 @@ def init():
 
 @app.route("/ask")
 def ask():
-    args = request.args
-    query = args.get("query", default="hello", type=str)
-    print("query:", query)
-    answer = privateGPT.enquire(gpt, query)
-    return answer
-
-@app.route("/ask-stream")
-def ask_stream():
     args = request.args
     query = args.get("query", default="hello", type=str)
     print("query:", query)

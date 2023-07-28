@@ -8,7 +8,7 @@ const fetchAnswer = (
   onAnswer: (res: string) => void,
   onFinally: () => void,
 ) => {
-  fetch(`http://localhost:8000/ask-stream?query=${text}`)
+  fetch(`http://localhost:8000/ask?query=${text}`)
     .then((res) => res.text())
     .then((res) => {
       onAnswer(res);
@@ -20,41 +20,44 @@ const fetchAnswer = (
 };
 
 export const Main = () => {
-  const [textContent, setTextContent] = useState(["Hello World!"]);
+  const [textContent, setTextContent] = useState([
+    "Hello World! First questions take longer than others",
+  ]);
   const [isLoading, setIsLoading] = useState(false);
 
-  useEffect(() => {
-    console.log("sse");
+  // Try streaming with SSE
+  // useEffect(() => {
+  //   console.log("sse");
 
-    const sse = new EventSource("http://localhost:8000/progress");
+  //   const sse = new EventSource("http://localhost:8000/progress");
 
-    sse.onmessage = ({ type, data }) => {
-      console.log("on message");
-      if (type === "message") console.log({ data });
-    };
+  //   sse.onmessage = ({ type, data }) => {
+  //     console.log("on message");
+  //     if (type === "message") console.log({ data });
+  //   };
 
-    sse.onopen = (res) => {
-      console.log("Open", res);
-      // sse.close();
-    };
+  //   sse.onopen = (res) => {
+  //     console.log("Open", res);
+  //     // sse.close();
+  //   };
 
-    return () => {
-      sse.close();
-    };
-  }, []);
+  //   return () => {
+  //     sse.close();
+  //   };
+  // }, []);
 
   const onSend = (text: string) => {
     setTextContent([text, ...textContent]);
     setIsLoading(true);
-    // fetchAnswer(
-    //   text,
-    //   (res) => {
-    //     setTextContent([res, text, ...textContent]);
-    //   },
-    //   () => {
-    //     setIsLoading(false);
-    //   },
-    // );
+    fetchAnswer(
+      text,
+      (res) => {
+        setTextContent([res, text, ...textContent]);
+      },
+      () => {
+        setIsLoading(false);
+      },
+    );
   };
   return (
     <Box
