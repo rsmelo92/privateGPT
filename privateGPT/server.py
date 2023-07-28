@@ -25,12 +25,14 @@ def ask():
     answer = privateGPT.enquire(gpt, query)
     return answer
 
-@app.route('/stream')
-def streamed_response():
+@app.route("/ask-stream")
+def ask():
+    args = request.args
+    query = args.get("query", default="hello", type=str)
+    print("query:", query)
     def generate():
-        yield gpt("good day my friend")
+        yield gpt(query)
     return Response(generate(), mimetype="text/event-stream")
-    # return app.response_class(stream_with_context(generate()), mimetype="text/event-stream")
 
 @app.route('/progress')
 def progress():

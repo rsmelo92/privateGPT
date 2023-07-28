@@ -46,7 +46,7 @@ def enquire(chain, query):
 
     return answer
 
-def prepare(callback):
+def prepare():
     # Parse the command line arguments
     # args = parse_arguments()
     embeddings = HuggingFaceEmbeddings(model_name=embeddings_model_name)
@@ -57,8 +57,8 @@ def prepare(callback):
     callbacks = [StreamingStdOutCallbackHandler()]
     
     # Prepare the LLM
-    llm = LlamaCpp(stream=True, model_path=model_path, n_gpu_layers=n_gpu_layers, f16_kv=True, max_tokens=model_n_ctx, n_batch=model_n_batch, callbacks=callback, verbose=False)
-    # llm = LlamaCpp(stream=True, model_path=model_path, n_gpu_layers=n_gpu_layers, f16_kv=True, max_tokens=model_n_ctx, n_batch=model_n_batch, callbacks=callbacks, verbose=False)
+    # llm = LlamaCpp(stream=True, model_path=model_path, n_gpu_layers=n_gpu_layers, f16_kv=True, max_tokens=model_n_ctx, n_batch=model_n_batch, callbacks=callback, verbose=False)
+    llm = LlamaCpp(stream=True, model_path=model_path, n_gpu_layers=n_gpu_layers, f16_kv=True, max_tokens=model_n_ctx, n_batch=model_n_batch, callbacks=callbacks, verbose=False)
 
     return RetrievalQA.from_chain_type(llm=llm, chain_type="stuff", retriever=retriever, return_source_documents=False)
 
