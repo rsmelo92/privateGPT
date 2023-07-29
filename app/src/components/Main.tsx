@@ -1,5 +1,5 @@
 import { Box, LinearProgress } from "@mui/material";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 import { TextArea } from "./TextArea";
 
@@ -21,30 +21,11 @@ const fetchAnswer = (
 
 export const Main = () => {
   const [textContent, setTextContent] = useState([
-    "Hello World! First questions take longer than others",
+    "First questions take longer than others",
+    "Hello World!"
   ]);
+
   const [isLoading, setIsLoading] = useState(false);
-
-  // Try streaming with SSE
-  // useEffect(() => {
-  //   console.log("sse");
-
-  //   const sse = new EventSource("http://localhost:8000/progress");
-
-  //   sse.onmessage = ({ type, data }) => {
-  //     console.log("on message");
-  //     if (type === "message") console.log({ data });
-  //   };
-
-  //   sse.onopen = (res) => {
-  //     console.log("Open", res);
-  //     // sse.close();
-  //   };
-
-  //   return () => {
-  //     sse.close();
-  //   };
-  // }, []);
 
   const onSend = (text: string) => {
     setTextContent([text, ...textContent]);
@@ -59,6 +40,7 @@ export const Main = () => {
       },
     );
   };
+
   return (
     <Box
       sx={{
